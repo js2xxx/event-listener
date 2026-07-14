@@ -224,9 +224,6 @@ impl Default for Event {
 impl<T> Event<T> {
     /// Creates a new `Event` with a tag type.
     ///
-    /// Tagging cannot be implemented efficiently on `no_std`, so this is only available when the
-    /// `std` feature is enabled.
-    ///
     /// # Examples
     ///
     /// ```
@@ -234,14 +231,14 @@ impl<T> Event<T> {
     ///
     /// let event = Event::<usize>::with_tag();
     /// ```
-    #[cfg(all(feature = "std", not(loom)))]
+    #[cfg(not(loom))]
     #[inline]
     pub const fn with_tag() -> Self {
         Self {
             inner: AtomicPtr::new(ptr::null_mut()),
         }
     }
-    #[cfg(all(feature = "std", loom))]
+    #[cfg(loom)]
     #[inline]
     pub fn with_tag() -> Self {
         Self {
