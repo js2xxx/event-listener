@@ -224,6 +224,11 @@ impl Default for Event {
 impl<T> Event<T> {
     /// Creates a new `Event` with a tag type.
     ///
+    /// Tags are short messages passed to listeners when they are notified. They are [cloned]
+    /// or [generated] and sent to each listener under an internal lock, so the corresponding
+    /// operation should be small and cheap. If you don't need a tag, use [`Event::new()`]
+    /// instead.
+    ///
     /// # Examples
     ///
     /// ```
@@ -231,6 +236,9 @@ impl<T> Event<T> {
     ///
     /// let event = Event::<usize>::with_tag();
     /// ```
+    ///
+    /// [cloned]: IntoNotification::tag
+    /// [generated]: IntoNotification::tag_with
     #[cfg(not(loom))]
     #[inline]
     pub const fn with_tag() -> Self {

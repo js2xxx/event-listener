@@ -467,8 +467,9 @@ pub trait IntoNotification: __private::Sealed {
     /// it is possible to optimize a `Mutex` implementation by locking directly on the next listener, without
     /// needing to ever unlock the mutex at all.
     ///
-    /// The tag provided is cloned to provide the tag for all listeners. In cases where this is not flexible
-    /// enough, use [`IntoNotification::tag_with()`] instead.
+    /// The tag provided is cloned to provide the tag for all listeners under an internal lock, so they should be
+    /// small and cheap to clone. In cases where this is not flexible enough, use
+    /// [`IntoNotification::tag_with()`] instead.
     ///
     /// # Examples
     ///
@@ -502,6 +503,10 @@ pub trait IntoNotification: __private::Sealed {
     /// it is possible to optimize a `Mutex` implementation by locking directly on the next listener, without
     /// needing to ever unlock the mutex at all.
     ///
+    /// The provided function is called under an internal lock to provide the tag for each listener, so it should be
+    /// lightweight and cheap to call. Specifically, calling [`notify`] inside the function will deadlock the
+    /// current execution context.
+    ///
     /// # Examples
     ///
     /// ```
@@ -521,6 +526,8 @@ pub trait IntoNotification: __private::Sealed {
     /// assert_eq!(listener2.wait(), false);
     /// # }
     /// ```
+    ///
+    /// [`notify`]: crate::Event::notify
     fn tag_with<T, F>(self, tag: F) -> TagWith<Self::Notify, F>
     where
         Self: Sized + IntoNotification<Tag = ()>,
